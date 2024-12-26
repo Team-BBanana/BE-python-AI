@@ -55,10 +55,12 @@ class ChatService:
             )
             
             current_sentence = ""
+            full_response = []
             async for chunk in stream:
                 if chunk.choices[0].delta.content:
                     content = chunk.choices[0].delta.content
                     current_sentence += content
+                    full_response.append(content)
                     
                     # 문장 완성 체크 (마침표, 느낌표, 물음표 등으로 판단)
                     if any(current_sentence.endswith(end) for end in ['.', '!', '?', '。']):
@@ -70,11 +72,10 @@ class ChatService:
                 yield current_sentence.strip()
             
             # 대화 기록에 AI 응답 추가
-            if full_response:
-                self.conversation_history.append({
-                    "role": "assistant", 
-                    "content": " ".join(full_response)
-                })
+            self.conversation_history.append({
+                "role": "assistant", 
+                "content": " ".join(full_response)
+            })
             
         except Exception as e:
             import traceback
@@ -97,7 +98,7 @@ class ChatService:
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": "이 그림에 대해 아이와 대화하듯이 친근하게 피드백해주세요."},
+                            {"type": "text", "text": "이 그림에 대해 아이와 대화하듯이 친근하게 피드백해주세요. 가능한 짧고 간결하게 답변해주세요."},
                             {
                                 "type": "image_url",
                                 "image_url": {
@@ -107,10 +108,9 @@ class ChatService:
                             }
                         ]
                     }
-                ],
-                max_tokens=300
+                ]
             )
-            return response.choices[0].message.content
+            return response.choices[0].message.content.strip()
         except Exception as e:
             logger.error(f"이미지 분석 중 오류 발생: {str(e)}")
             return "그림을 분석하는데 문제가 생겼어. 다시 한 번 보여줄래?"

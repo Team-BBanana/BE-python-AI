@@ -35,7 +35,7 @@ class AudioService:
     async def text_to_speech(self, text: str) -> bytes:
         """텍스트를 음성으로 변환"""
         response = await client.audio.speech.create(
-            model="tts-1",
+            model="gpt-4o",
             voice=self.current_voice,  # 설정된 음성 사용
             input=text,
             speed=1.0,
