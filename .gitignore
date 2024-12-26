@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 가상 환경
+venv/
+.env
+.venv/
+env/
+
+# IDE 설정
+.idea/
+.vscode/
+
+# 로그 파일
+*.log
+
+# 기타
+*.DS_Store
+*.egg-info/
+*.egg

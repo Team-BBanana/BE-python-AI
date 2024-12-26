@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 친구와 대화해요!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #FFE5F1;  /* 부드러운 분홍색 배경 */
+            background-image: radial-gradient(#fff 10%, transparent 11%),
+                            radial-gradient(#fff 10%, transparent 11%);
+            background-size: 30px 30px;  /* 귀여운 도트 패턴 */
+            background-position: 0 0, 30px 30px;
+        }
+        
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid #FFB6C1;  /* 분홍색 테두리 */
+        }
+        
+        h1 {
+            text-align: center;
+            color: #FF69B4;  /* 밝은 분홍색 */
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-messages {
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 2px solid #FFB6C1;
+            border-radius: 15px;
+            background-color: #fff;
+        }
+        
+        .message {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            position: relative;
+        }
+        
+        .user-message {
+            background-color: #FFB6C1;  /* 분홍색 */
+            color: white;
+            margin-left: auto;
+            padding-right: 20px;
+        }
+        
+        .ai-message {
+            background-color: #B0E0E6;  /* 파스텔 블루 */
+            color: #444;
+            margin-right: auto;
+            padding-left: 20px;
+        }
+        
+        .message::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .user-message::before {
+            right: 10px;
+            background: radial-gradient(circle at top left, transparent 70%, #FFB6C1 30%);
+        }
+        
+        .ai-message::before {
+            left: 10px;
+            background: radial-gradient(circle at top right, transparent 70%, #B0E0E6 30%);
+        }
+        
+        .message-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .control-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(145deg, #FF69B4, #FFB6C1);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.3);
+        }
+        
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 182, 193, 0.4);
+        }
+        
+        .control-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .recording-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: #FF4081;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+        
+        /* 스크롤바 스타일링 */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #FFB6C1;
+            border-radius: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #FF69B4;
+        }
+        
+        /* 말풍선 효과 */
+        .message {
+            animation: popIn 0.3s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .drawing-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        #drawingCanvas {
+            border: 2px solid #FFB6C1;
+            border-radius: 15px;
+            background-color: white;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        
+        .drawing-controls {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>🌈 AI 친구와 대화해요! 🎈</h1>
+        <div class="chat-messages" id="chatMessages">
+            <!-- 대화 내용이 여기에 추가됩니다 -->
+        </div>
+        <div class="button-container">
+            <button id="startButton" class="control-button">🎤 말하기 시작!</button>
+            <button id="stopButton" class="control-button" disabled>✋ 말하기 끝!</button>
+        </div>
+        <div class="status" id="status">친구와 대화할 준비가 되었어요! 🎈</div>
+        <div class="drawing-container">
+            <canvas id="drawingCanvas" width="400" height="300"></canvas>
+            <div class="drawing-controls">
+                <button id="clearButton" class="control-button">🗑️ 지우기</button>
+                <button id="sendDrawingButton" class="control-button">✨ 그림 보내기</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { VoiceChat } from '/static/js/chat.js';
+        import { DrawingHandler } from '/static/js/drawing_handler.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const voiceChat = new VoiceChat();
+            const drawingHandler = new DrawingHandler(
+                document.getElementById('drawingCanvas')
+            );
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+            const status = document.getElementById('status');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            function addMessage(text, isUser = false, isPartial = false) {
+                // 각 메시지를 독립적으로 추가
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+                
+                const messageText = document.createElement('div');
+                messageText.textContent = text;
+                messageDiv.appendChild(messageText);
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString();
+                messageDiv.appendChild(timeDiv);
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // VoiceChat 인스턴스에 메시지 처리 콜백 추가
+            voiceChat.onMessage = (text, isUser) => {
+                addMessage(text, isUser);
+            };
+            
+            startButton.onclick = async () => {
+                try {
+                    await voiceChat.startRecording();
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                    status.innerHTML = '<span class="recording-indicator"></span>녹음 중...';
+                } catch (error) {
+                    console.error('녹음 시작 실패:', error);
+                    status.textContent = '녹음 시작 실패';
+                }
+            };
+            
+            stopButton.onclick = () => {
+                voiceChat.stopRecording();
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                status.textContent = '대기 중...';
+            };
+            
+            // 그림 관련 버튼 이벤트 추가
+            document.getElementById('clearButton').onclick = () => {
+                drawingHandler.clear();
+            };
+            
+            document.getElementById('sendDrawingButton').onclick = () => {
+                const imageData = drawingHandler.getImageData();
+                voiceChat.socket.send(imageData);
+                status.textContent = '그림을 분석하고 있어요...';
+            };
+        });
+    </script>
+</body>
+</html> 
