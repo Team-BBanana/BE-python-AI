@@ -17,8 +17,8 @@ logging.basicConfig(
 )
 
 # 정적 파일과 템플릿 설정
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
-templates = Jinja2Templates(directory="src/templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 # WebSocket 핸들러 설정
 chat_websocket = ChatWebSocket()
